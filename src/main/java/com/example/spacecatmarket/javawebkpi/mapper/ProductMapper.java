@@ -4,8 +4,9 @@ import com.example.spacecatmarket.javawebkpi.domain.Product;
 import com.example.spacecatmarket.javawebkpi.dto.ProductDto;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {CategoryMapper.class})
 public interface ProductMapper {
     ProductDto mapToDto(Product product);
     Product mapDtoToProduct(ProductDto productDto);
 }
+

@@ -1,9 +1,15 @@
 package com.example.spacecatmarket.javawebkpi.domain;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.Value;
 
-@Value
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Category {
-    Long id;
-    String name;
+    private Long id;
+    private String name;
 }
+
