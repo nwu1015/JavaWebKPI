@@ -4,6 +4,7 @@ import com.example.spacecatmarket.javawebkpi.domain.Product;
 import com.example.spacecatmarket.javawebkpi.dto.ProductDto;
 import com.example.spacecatmarket.javawebkpi.mapper.ProductMapper;
 import com.example.spacecatmarket.javawebkpi.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +21,7 @@ public class ProductController {
     private final ProductMapper productMapper;
 
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto) {
+    public ResponseEntity<ProductDto> createProduct(@Valid @RequestBody ProductDto productDto) {
         Product product = productMapper.mapDtoToProduct(productDto);
         Product savedProduct = productService.addProduct(product);
         ProductDto response = productMapper.mapToDto(savedProduct);
@@ -47,7 +48,7 @@ public class ProductController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id,
-                                                    @RequestBody ProductDto productDto) {
+                                                    @Valid @RequestBody ProductDto productDto) {
         Product product = productMapper.mapDtoToProduct(productDto);
         Product updatedProduct = productService.updateProduct(id, product);
         return ResponseEntity.ok(productMapper.mapToDto(updatedProduct));
