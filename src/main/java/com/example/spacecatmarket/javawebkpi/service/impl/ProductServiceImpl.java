@@ -1,7 +1,7 @@
 package com.example.spacecatmarket.javawebkpi.service.impl;
 
 import com.example.spacecatmarket.javawebkpi.domain.Category;
-import com.example.spacecatmarket.javawebkpi.dto.ProductDto;
+import com.example.spacecatmarket.javawebkpi.domain.Product;
 import com.example.spacecatmarket.javawebkpi.mapper.CategoryMapper;
 import com.example.spacecatmarket.javawebkpi.mapper.ProductMapper;
 import com.example.spacecatmarket.javawebkpi.service.ProductService;
@@ -18,7 +18,7 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
     private final CategoryMapper categoryMapper;
     private final AtomicLong id = new AtomicLong(1);
-    private final ConcurrentHashMap<Long, ProductDto> products = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, Product> products = new ConcurrentHashMap<>();
 
     public ProductServiceImpl(ProductMapper productMapper, CategoryMapper categoryMapper) {
         this.productMapper = productMapper;
@@ -32,12 +32,12 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void createData(String name, String description, Double price, Category category) {
-        ProductDto productDto = ProductDto.builder().id(id.getAndIncrement()).name(name).description(description).price(price).category(category).build();
-        products.put(productDto.getId(), productDto);
+        Product product = Product.builder().id(id.getAndIncrement()).name(name).description(description).price(price).category(category).build();
+        products.put(product.getId(), product);
     }
 
     @Override
-    public ProductDto addProduct(ProductDto product) {
+    public Product addProduct(Product product) {
         long newId = id.incrementAndGet();
         product.setId(newId);
         products.put(newId, product);
@@ -45,17 +45,17 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public List<ProductDto> findProducts() {
+    public List<Product> findProducts() {
         return new ArrayList<>(products.values());
     }
 
     @Override
-    public ProductDto findById(Long id) {
+    public Product findById(Long id) {
         return products.get(id);
     }
 
     @Override
-    public ProductDto updateProduct(Long id, ProductDto product) {
+    public Product updateProduct(Long id, Product product) {
         if (!products.containsKey(id)) {
             return addProduct(product);
         }

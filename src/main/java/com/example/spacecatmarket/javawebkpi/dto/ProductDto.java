@@ -1,7 +1,6 @@
 package com.example.spacecatmarket.javawebkpi.dto;
 
 import com.example.spacecatmarket.javawebkpi.domain.Category;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

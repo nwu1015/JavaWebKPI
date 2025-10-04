@@ -2,6 +2,7 @@ package com.example.spacecatmarket.javawebkpi.web;
 
 import com.example.spacecatmarket.javawebkpi.domain.Product;
 import com.example.spacecatmarket.javawebkpi.dto.ProductDto;
+import com.example.spacecatmarket.javawebkpi.mapper.ProductMapper;
 import com.example.spacecatmarket.javawebkpi.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -16,34 +17,46 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductMapper productMapper;
 
     @PostMapping
-    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto product) {
-        return new ResponseEntity<>(productService.addProduct(product), HttpStatus.CREATED);
+    public ResponseEntity<ProductDto> createProduct(@RequestBody ProductDto productDto) {
+        Product product = productMapper.mapDtoToProduct(productDto);
+        Product savedProduct = productService.addProduct(product);
+        ProductDto response = productMapper.mapToDto(savedProduct);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
     @GetMapping
     public ResponseEntity<List<ProductDto>> getProducts() {
-        List<ProductDto> products = productService.findProducts();
-        return new ResponseEntity<>(products, HttpStatus.OK);
+        List<Product> products = productService.findProducts();
+        List<ProductDto> dtos = products.stream()
+                .map(productMapper::mapToDto)
+                .toList();
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ProductDto> getProductById(@PathVariable Long id) {
-        ProductDto product = productService.findById(id);
-        return new ResponseEntity<>(product, HttpStatus.OK);
+        Product product = productService.findById(id);
+        if (product == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(productMapper.mapToDto(product));
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<ProductDto> updateProduct(@PathVariable Long id,
-                                                    @RequestBody ProductDto product) {
-        ProductDto updatedProduct = productService.updateProduct(id, product);
-        return new ResponseEntity<>(updatedProduct, HttpStatus.OK);
+                                                    @RequestBody ProductDto productDto) {
+        Product product = productMapper.mapDtoToProduct(productDto);
+        Product updatedProduct = productService.updateProduct(id, product);
+        return ResponseEntity.ok(productMapper.mapToDto(updatedProduct));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ProductDto> deleteProduct(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteProduct(@PathVariable Long id) {
         productService.deleteProduct(id);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return ResponseEntity.ok().build();
     }
 }
+
