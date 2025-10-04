@@ -5,6 +5,7 @@ import com.example.spacecatmarket.javawebkpi.domain.Product;
 import com.example.spacecatmarket.javawebkpi.mapper.CategoryMapper;
 import com.example.spacecatmarket.javawebkpi.mapper.ProductMapper;
 import com.example.spacecatmarket.javawebkpi.service.ProductService;
+import com.example.spacecatmarket.javawebkpi.service.exception.ProductNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -12,7 +13,6 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
-// TODO: hide ID
 @Service
 public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
@@ -51,13 +51,17 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product findById(Long id) {
-        return products.get(id);
+        Product product = products.get(id);
+        if (product == null) {
+            throw new ProductNotFoundException(id);
+        }
+        return product;
     }
 
     @Override
     public Product updateProduct(Long id, Product product) {
         if (!products.containsKey(id)) {
-            return addProduct(product);
+            throw new ProductNotFoundException(id);
         }
         product.setId(id);
         products.put(id, product);
@@ -66,6 +70,9 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(Long id) {
+        if (!products.containsKey(id)) {
+            throw new ProductNotFoundException(id);
+        }
         products.remove(id);
     }
 }
