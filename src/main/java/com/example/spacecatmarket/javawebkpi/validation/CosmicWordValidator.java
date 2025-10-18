@@ -11,7 +11,7 @@ public class CosmicWordValidator implements ConstraintValidator<CosmicWordCheck,
     @Override
     public boolean isValid(String value, ConstraintValidatorContext context) {
         if (value == null || value.isEmpty()) {
-            return true; // @NotNull/ @NotEmpty обробляють це окремо
+            return true;
         }
 
         String lowerValue = value.toLowerCase();

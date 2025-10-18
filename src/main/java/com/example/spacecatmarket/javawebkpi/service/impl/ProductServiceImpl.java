@@ -27,12 +27,25 @@ public class ProductServiceImpl implements ProductService {
     }
 
     private void initializeMockData() {
-        createData("Antigravity ball", "Antigravity balls of thread", 100.0, new Category(1L, "Main"));
-        createData("Space milk", "Super duper wonderful wonderful extraordinary useful satisfying sweet milk", 150.0, new Category(2L, "Main"));
+        createData(
+                "Antigravity ball",
+                "Antigravity balls of thread",
+                100.0,
+                new Category(1L, "Main"));
+        createData(
+                "Space milk",
+                "Super duper wonderful wonderful extraordinary useful satisfying sweet milk",
+                150.0,
+                new Category(2L, "Main"));
     }
 
     private void createData(String name, String description, Double price, Category category) {
-        Product product = Product.builder().id(id.getAndIncrement()).name(name).description(description).price(price).category(category).build();
+        Product product = Product.builder()
+                .id(id.getAndIncrement())
+                .name(name)
+                .description(description)
+                .price(price)
+                .category(category).build();
         products.put(product.getId(), product);
     }
 
@@ -70,9 +83,6 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public void deleteProduct(Long id) {
-        if (!products.containsKey(id)) {
-            throw new ProductNotFoundException(id);
-        }
         products.remove(id);
     }
 }
