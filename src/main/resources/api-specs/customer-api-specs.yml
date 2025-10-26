@@ -5,7 +5,7 @@ info:
   version: 1.0.0
 
 paths:
-  /api/products:
+  /api/v1/products:
     get:
       summary: Get all products
       tags:
@@ -53,16 +53,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiErrorResponse'
-        '409':
-          description: Conflict — product with same unique attribute already exists
-          content:
-            application/json:
-              schema: { $ref: "#/components/schemas/ApiErrorResponse" }
-              example:
-                status: 409
-                error: "Conflict"
-                message: "Product with this name already exists"
-                path: "/api/products"
         '500':
           description: Internal Server Error
           content:
@@ -74,7 +64,7 @@ paths:
                 message: "Unexpected error occurred"
                 path: "/api/products"
 
-  /api/products/{id}:
+  /api/v1/products/{id}:
     get:
       summary: Get a product by id
       tags:

@@ -31,12 +31,18 @@ public class ProductServiceImpl implements ProductService {
                 "Antigravity ball",
                 "Antigravity balls of thread",
                 100.0,
-                new Category(1L, "Main"));
+                Category.builder()
+                        .id(1L)
+                        .name("Main")
+                        .build());
         createData(
                 "Space milk",
                 "Super duper wonderful wonderful extraordinary useful satisfying sweet milk",
                 150.0,
-                new Category(2L, "Main"));
+                Category.builder()
+                        .id(2L)
+                        .name("Main")
+                        .build());
     }
 
     private void createData(String name, String description, Double price, Category category) {

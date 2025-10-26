@@ -1,8 +1,8 @@
 package com.example.spacecatmarket.javawebkpi.exception;
 
 import com.example.spacecatmarket.javawebkpi.service.exception.ProductNotFoundException;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -14,22 +14,17 @@ import java.util.stream.Collectors;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ProductNotFoundException.class)
-    public ResponseEntity<ApiErrorResponse> handleProductNotFound(ProductNotFoundException ex,
-                                                                  HttpServletRequest request) {
-        ApiErrorResponse response = ApiErrorResponse.builder()
-                .status(HttpStatus.NOT_FOUND.value())
-                .error(HttpStatus.NOT_FOUND.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
+    public ResponseEntity<ProblemDetail> handleProductNotFound(ProductNotFoundException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);
 
-        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+        problemDetail.setProperty("message", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(problemDetail);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiErrorResponse> handleValidationExceptions(
-            MethodArgumentNotValidException ex,
-            HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleValidationExceptions(
+            MethodArgumentNotValidException ex) {
 
         String fieldMessages = ex.getBindingResult().getFieldErrors().stream()
                 .map(error -> String.format("Field '%s' %s", error.getField(),
@@ -40,28 +35,18 @@ public class GlobalExceptionHandler {
                 ex.getBindingResult().getObjectName(),
                 fieldMessages);
 
-        ApiErrorResponse response = ApiErrorResponse.builder()
-                .status(HttpStatus.BAD_REQUEST.value())
-                .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
-                .message(message)
-                .path(request.getRequestURI())
-                .build();
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
+        problemDetail.setProperty("message", message);
 
-        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(problemDetail);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiErrorResponse> handleGlobalException(
-            Exception ex,
-            HttpServletRequest request) {
+    public ResponseEntity<ProblemDetail> handleGlobalException(Exception ex) {
 
-        ApiErrorResponse response = ApiErrorResponse.builder()
-                .status(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .error(HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase())
-                .message(ex.getMessage())
-                .path(request.getRequestURI())
-                .build();
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        problemDetail.setProperty("message", ex.getMessage());
 
-        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(problemDetail);
     }
 }

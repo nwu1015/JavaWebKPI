@@ -2,11 +2,12 @@ package com.example.spacecatmarket.javawebkpi.mapper;
 
 import com.example.spacecatmarket.javawebkpi.domain.Product;
 import com.example.spacecatmarket.javawebkpi.dto.ProductDto;
+import org.mapstruct.Builder;
 import org.mapstruct.Mapper;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", builder = @Builder(disableBuilder = true))
 public interface ProductMapper {
-    ProductDto mapToDto(Product product);
+    ProductDto toProductDto(Product product);
 
-    Product mapDtoToProduct(ProductDto productDto);
+    Product toProduct(ProductDto productDto);
 }

@@ -1,11 +1,11 @@
 package com.example.spacecatmarket.javawebkpi.domain;
 
 import lombok.Builder;
-import lombok.Data;
+import lombok.Value;
 
 import java.util.List;
 
-@Data
+@Value
 @Builder
 public class Cart {
     Long id;

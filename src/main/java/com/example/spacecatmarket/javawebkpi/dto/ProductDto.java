@@ -9,8 +9,8 @@ import lombok.*;
 
 @Data
 @Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class ProductDto {
     Long id;
 
