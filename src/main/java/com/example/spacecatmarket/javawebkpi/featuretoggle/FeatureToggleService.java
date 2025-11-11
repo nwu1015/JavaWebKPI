@@ -1,5 +1,6 @@
 package com.example.spacecatmarket.javawebkpi.featuretoggle;
 
+import com.example.spacecatmarket.javawebkpi.config.FeatureToggleProperties;
 import org.springframework.stereotype.Service;
 
 import java.util.concurrent.ConcurrentHashMap;
