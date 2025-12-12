@@ -1,94 +1,84 @@
 package com.example.spacecatmarket.javawebkpi.service.impl;
 
-import com.example.spacecatmarket.javawebkpi.domain.Category;
 import com.example.spacecatmarket.javawebkpi.domain.Product;
-import com.example.spacecatmarket.javawebkpi.mapper.CategoryMapper;
+import com.example.spacecatmarket.javawebkpi.repository.CategoryRepository;
+import com.example.spacecatmarket.javawebkpi.repository.ProductRepository;
+import com.example.spacecatmarket.javawebkpi.repository.entity.CategoryEntity;
+import com.example.spacecatmarket.javawebkpi.repository.entity.ProductEntity;
 import com.example.spacecatmarket.javawebkpi.mapper.ProductMapper;
 import com.example.spacecatmarket.javawebkpi.service.ProductService;
 import com.example.spacecatmarket.javawebkpi.service.exception.ProductNotFoundException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
+
+    private final ProductRepository productRepository;
+    private final CategoryRepository categoryRepository;
     private final ProductMapper productMapper;
-    private final CategoryMapper categoryMapper;
-    private final AtomicLong id = new AtomicLong(1);
-    private final ConcurrentHashMap<Long, Product> products = new ConcurrentHashMap<>();
 
-    public ProductServiceImpl(ProductMapper productMapper, CategoryMapper categoryMapper) {
-        this.productMapper = productMapper;
-        this.categoryMapper = categoryMapper;
-        initializeMockData();
-    }
+    @Override
+    @Transactional
+    public Product addProduct(Product productDomain) {
+        CategoryEntity categoryEntity = categoryRepository.findById(productDomain.getCategory().getId())
+                .orElseThrow(() -> new RuntimeException("Category not found"));
 
-    private void initializeMockData() {
-        createData(
-                "Antigravity ball",
-                "Antigravity balls of thread",
-                100.0,
-                Category.builder()
-                        .id(1L)
-                        .name("Main")
-                        .build());
-        createData(
-                "Space milk",
-                "Super duper wonderful wonderful extraordinary useful satisfying sweet milk",
-                150.0,
-                Category.builder()
-                        .id(2L)
-                        .name("Main")
-                        .build());
-    }
+        ProductEntity entity = productMapper.toEntity(productDomain);
+        entity.setCategory(categoryEntity);
 
-    private void createData(String name, String description, Double price, Category category) {
-        Product product = Product.builder()
-                .id(id.getAndIncrement())
-                .name(name)
-                .description(description)
-                .price(price)
-                .category(category).build();
-        products.put(product.getId(), product);
+        ProductEntity savedEntity = productRepository.save(entity);
+
+        return productMapper.toDomain(savedEntity);
     }
 
     @Override
-    public Product addProduct(Product product) {
-        long newId = id.incrementAndGet();
-        product.setId(newId);
-        products.put(newId, product);
-        return product;
-    }
-
-    @Override
+    @Transactional(readOnly = true)
     public List<Product> findProducts() {
-        return new ArrayList<>(products.values());
+        return productRepository.findAll().stream()
+                .map(productMapper::toDomain)
+                .collect(Collectors.toList());
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Product findById(Long id) {
-        Product product = products.get(id);
-        if (product == null) {
-            throw new ProductNotFoundException(id);
-        }
-        return product;
+        return productRepository.findById(id)
+                .map(productMapper::toDomain)
+                .orElseThrow(() -> new ProductNotFoundException(id));
     }
 
     @Override
-    public Product updateProduct(Long id, Product product) {
-        if (!products.containsKey(id)) {
-            throw new ProductNotFoundException(id);
+    @Transactional
+    public Product updateProduct(Long id, Product productDomain) {
+        ProductEntity existingEntity = productRepository.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+
+        existingEntity.setName(productDomain.getName());
+        existingEntity.setDescription(productDomain.getDescription());
+        existingEntity.setPrice(productDomain.getPrice());
+
+        if (productDomain.getCategory() != null) {
+            CategoryEntity newCategory = categoryRepository.findById(productDomain.getCategory().getId())
+                    .orElseThrow(() -> new RuntimeException("Category not found"));
+            existingEntity.setCategory(newCategory);
         }
-        product.setId(id);
-        products.put(id, product);
-        return product;
+
+        ProductEntity updatedEntity = productRepository.save(existingEntity);
+        return productMapper.toDomain(updatedEntity);
     }
 
     @Override
+    @Transactional
     public void deleteProduct(Long id) {
-        products.remove(id);
+        if (!productRepository.existsById(id)) {
+            throw new ProductNotFoundException(id);
+        }
+        productRepository.deleteById(id);
     }
 }

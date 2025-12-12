@@ -1,6 +1,6 @@
 package com.example.spacecatmarket.javawebkpi.dto;
 
-import com.example.spacecatmarket.javawebkpi.domain.ProductItem;
+import com.example.spacecatmarket.javawebkpi.domain.OrderItem;
 import lombok.Builder;
 import lombok.Value;
 
@@ -10,5 +10,5 @@ import java.util.List;
 @Builder
 public class CartDto {
     Long customerId;
-    List<ProductItem> products;
+    List<OrderItem> products;
 }

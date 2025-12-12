@@ -7,6 +7,7 @@ import java.util.List;
 @Value
 public class Order {
     Long id;
-    List<Product> products;
+    String orderNumber;
+    List<OrderItem> products;
     Double totalPrice;
 }

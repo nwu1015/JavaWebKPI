@@ -1,120 +1,130 @@
 package com.example.spacecatmarket.javawebkpi.service;
 
-import com.example.spacecatmarket.javawebkpi.config.MapperTestConfiguration;
 import com.example.spacecatmarket.javawebkpi.domain.Category;
 import com.example.spacecatmarket.javawebkpi.domain.Product;
+import com.example.spacecatmarket.javawebkpi.integration.AbstractIntegrationTest;
 import com.example.spacecatmarket.javawebkpi.service.exception.ProductNotFoundException;
-import com.example.spacecatmarket.javawebkpi.service.impl.ProductServiceImpl;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-@SpringBootTest(classes = ProductServiceImpl.class)
-@Import(MapperTestConfiguration.class)
-@DisplayName("Product Service Test")
-@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-public class ProductServiceTest {
+@Transactional
+@DisplayName("Product Service Integration Test")
+public class ProductServiceTest extends AbstractIntegrationTest {
+
+    @Autowired
+    private ProductService productService;
+
+    @Autowired
+    private CategoryService categoryService;
 
     private static final String PRODUCT_NAME = "Space Helmet";
     private static final double PRODUCT_PRICE = 250.5;
     private static final String PRODUCT_DESCRIPTION = "High-quality astronaut helmet";
-    private static final Category CATEGORY = Category.builder()
-            .id(3L)
-            .name("Equipment")
-            .build();
-
-    @Autowired
-    private ProductServiceImpl productService;
-
-    @Test
-    @DisplayName("Should return all products")
-    @Order(1)
-    void testFindProducts() {
-        List<Product> products = productService.findProducts();
-
-        assertNotNull(products);
-        assertEquals(2, products.size());
-        assertTrue(products.stream()
-                .anyMatch(p -> p.getName().equals("Antigravity ball")));
-        assertTrue(products.stream()
-                .anyMatch(p -> p.getName().equals("Space milk")));
-    }
-
-    @Test
-    @DisplayName("Should find product by ID")
-    @Order(2)
-    void testFindById() {
-        Product product = productService.findById(1L);
-
-        assertNotNull(product);
-        assertEquals(1L, product.getId());
-        assertEquals("Antigravity ball", product.getName());
-        assertEquals(100.0, product.getPrice());
-        assertNotNull(product.getCategory());
-        assertEquals("Main", product.getCategory().getName());
-    }
 
     @Test
     @DisplayName("Should add a new product")
-    @Order(3)
     void testAddProduct() {
+        Category category = categoryService.createCategory(Category.builder().name("Equipment").build());
+
         Product newProduct = Product.builder()
                 .name(PRODUCT_NAME)
                 .description(PRODUCT_DESCRIPTION)
                 .price(PRODUCT_PRICE)
-                .category(CATEGORY)
+                .category(category)
                 .build();
 
         Product added = productService.addProduct(newProduct);
-        assertNotNull(added.getId());
-        assertEquals(PRODUCT_NAME, added.getName());
 
-        List<Product> all = productService.findProducts();
-        assertEquals(3, all.size(), "There should be 3 products after adding one");
+        assertNotNull(added.getId(), "ID should be generated");
+        assertEquals(PRODUCT_NAME, added.getName());
+        assertEquals("Equipment", added.getCategory().getName());
+    }
+
+    @Test
+    @DisplayName("Should find product by ID")
+    void testFindById() {
+        Category category = categoryService.createCategory(Category.builder().name("Main").build());
+        Product product = productService.addProduct(Product.builder()
+                .name("Antigravity ball")
+                .price(100.0)
+                .category(category)
+                .build());
+
+        Product found = productService.findById(product.getId());
+
+        assertNotNull(found);
+        assertEquals(product.getId(), found.getId());
+        assertEquals("Antigravity ball", found.getName());
+    }
+
+    @Test
+    @DisplayName("Should return all products")
+    void testFindProducts() {
+        Category category = categoryService.createCategory(Category.builder().name("Food").build());
+        productService.addProduct(Product.builder().name("Space Milk").price(10.0).category(category).build());
+        productService.addProduct(Product.builder().name("Space Bread").price(5.0).category(category).build());
+
+        List<Product> products = productService.findProducts();
+
+        assertNotNull(products);
+        assertTrue(products.size() >= 2);
+        assertTrue(products.stream().anyMatch(p -> p.getName().equals("Space Milk")));
+        assertTrue(products.stream().anyMatch(p -> p.getName().equals("Space Bread")));
     }
 
     @Test
     @DisplayName("Should update an existing product")
-    @Order(4)
     void testUpdateProduct() {
-        Product updated = Product.builder()
+        Category category = categoryService.createCategory(Category.builder().name("Old Cat").build());
+        Product original = productService.addProduct(Product.builder()
+                .name("Old Helmet")
+                .price(100.0)
+                .category(category)
+                .build());
+
+        Product updateData = Product.builder()
                 .name("Updated Helmet")
-                .description("New version of helmet")
+                .description("New version")
                 .price(300.0)
-                .category(CATEGORY)
+                .category(category)
                 .build();
 
-        Product result = productService.updateProduct(2L, updated);
-        assertEquals(2L, result.getId());
-        assertEquals("Updated Helmet", result.getName());
+        Product result = productService.updateProduct(original.getId(), updateData);
 
-        Product fetched = productService.findById(2L);
+        assertEquals(original.getId(), result.getId());
+        assertEquals("Updated Helmet", result.getName());
+        assertEquals(300.0, result.getPrice());
+
+        Product fetched = productService.findById(original.getId());
         assertEquals("Updated Helmet", fetched.getName());
-        assertEquals(300.0, fetched.getPrice());
     }
 
     @Test
     @DisplayName("Should delete product by ID")
-    @Order(5)
     void testDeleteProduct() {
-        productService.deleteProduct(2L);
+        Category category = categoryService.createCategory(Category.builder().name("Trash").build());
+        Product product = productService.addProduct(Product.builder()
+                .name("To Delete")
+                .price(1.0)
+                .category(category)
+                .build());
 
-        List<Product> remaining = productService.findProducts();
-        assertEquals(2, remaining.size(), "There should be 2 products after deletion");
+        Long idToDelete = product.getId();
 
-        assertThrows(ProductNotFoundException.class, () -> productService.findById(2L));
+        productService.deleteProduct(idToDelete);
+
+        assertThrows(ProductNotFoundException.class, () -> productService.findById(idToDelete));
     }
 
     @Test
-    @DisplayName("Should handle deleting non-existent product gracefully")
-    @Order(6)
+    @DisplayName("Should throw exception when deleting non-existent product")
     void testDeleteNonExistentProduct() {
-        assertDoesNotThrow(() -> productService.deleteProduct(999L));
-
-        assertEquals(2, productService.findProducts().size());
+        assertThrows(ProductNotFoundException.class, () -> productService.deleteProduct(99999L));
     }
 }
