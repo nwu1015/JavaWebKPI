@@ -10,5 +10,5 @@ import java.util.List;
 public class Cart {
     Long id;
     Long customerId;
-    List<ProductItem> products;
+    List<OrderItem> products;
 }

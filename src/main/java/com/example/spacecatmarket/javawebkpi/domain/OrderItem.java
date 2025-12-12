@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class ProductItem {
+public class OrderItem {
     Product product;
     int quantity;
 }
