@@ -7,6 +7,7 @@ import com.example.spacecatmarket.javawebkpi.service.exception.ProductNotFoundEx
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -15,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @Transactional
 @DisplayName("Product Service Integration Test")
+@WithMockUser(username = "tester", roles = "USER")
 public class ProductServiceTest extends AbstractIntegrationTest {
 
     @Autowired
