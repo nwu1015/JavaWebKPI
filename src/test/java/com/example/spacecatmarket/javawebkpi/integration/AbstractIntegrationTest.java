@@ -1,5 +1,6 @@
 package com.example.spacecatmarket.javawebkpi.integration;
 
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
@@ -7,6 +8,7 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@AutoConfigureMockMvc
 @Testcontainers
 public abstract class AbstractIntegrationTest {
 
@@ -28,5 +30,8 @@ public abstract class AbstractIntegrationTest {
 
         registry.add("spring.liquibase.change-log", () -> "classpath:liquibase/changelog.yaml");
         registry.add("spring.liquibase.enabled", () -> "true");
+
+        registry.add("spring.security.oauth2.client.registration.github.client-id", () -> "test-id");
+        registry.add("spring.security.oauth2.client.registration.github.client-secret", () -> "test-secret");
     }
 }

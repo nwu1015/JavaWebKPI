@@ -32,7 +32,23 @@ spring:
     change-log: classpath:liquibase/changelog.yaml
     enabled: true
 
+  security:
+    oauth2:
+      client:
+        registration:
+          github:
+            clientId: ${GITHUB_CLIENT_ID}
+            clientSecret: ${GITHUB_CLIENT_SECRET}
+            scope: user:email
+            redirect-uri: http://localhost:8080/login/oauth2/code/github
+            authorization-grant-type: authorization_code
+
 feature:
   toggles:
     cosmoCats: true
     kittyProducts: false
+
+# Environment variable I use
+security:
+  jwt:
+    secret:

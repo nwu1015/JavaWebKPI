@@ -5,6 +5,7 @@ import com.example.spacecatmarket.javawebkpi.domain.Category;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
@@ -13,6 +14,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Transactional
 @DisplayName("Category Service Integration Test")
+@WithMockUser(username = "tester", roles = "USER")
 class CategoryServiceTest extends AbstractIntegrationTest {
 
     @Autowired
